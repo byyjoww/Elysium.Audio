@@ -21,7 +21,7 @@ namespace Elysium.Audio
         [Header("Audio control")]
         [SerializeField] private VolumeControl volumeControl = default;
 
-        private Dictionary<AudioCueSO, SoundEmitter> activeSoundEmitters = default;
+        private List<AudioCueWrapper> activeSoundEmitters = default;
 
         // ------------------------------------ PUBLIC ------------------------------------ //
 
@@ -30,53 +30,28 @@ namespace Elysium.Audio
         /// </summary>
         public void PlayAudioCue(AudioCueSO _audioCue, AudioConfigSO _settings, Vector3 _position = default)
         {
+            if (_audioCue.IsEmpty()) { return; }
+
             AudioClip[] clipsToPlay = _audioCue.GetClips();
             int nOfClips = clipsToPlay.Length;
 
             for (int i = 0; i < nOfClips; i++)
             {
                 SoundEmitter soundEmitter = _pool.Request();
-                activeSoundEmitters.Add(_audioCue, soundEmitter);
+                activeSoundEmitters.Add(new AudioCueWrapper(_audioCue, soundEmitter));
                 if (soundEmitter != null)
                 {
                     soundEmitter.PlayAudioClip(clipsToPlay[i], _settings, _audioCue.looping, _position);
-                    if (!_audioCue.looping) { soundEmitter.OnSoundFinishedPlaying += OnSoundEmitterFinishedPlaying; }                        
+                    if (!_audioCue.looping) { soundEmitter.OnSoundFinishedPlaying += OnSoundEmitterFinishedPlaying; }
                 }
             }
-        }
-
-        /// <summary>
-        /// Stop an AudioCue and release any held resources.
-        /// </summary>
-        public void StopAudioCue(AudioCueSO _audioCue)
-        {
-            if (activeSoundEmitters.ContainsKey(_audioCue)) { return; }
-            activeSoundEmitters[_audioCue].Stop();            
-        }
-
-        /// <summary>
-        /// Pause an AudioCue, while still witholding any resources.
-        /// </summary>
-        public void PauseAudioCue(AudioCueSO _audioCue)
-        {
-            if (activeSoundEmitters.ContainsKey(_audioCue)) { return; }
-            activeSoundEmitters[_audioCue].Pause();
-        }
-
-        /// <summary>
-        /// Resume a paused AudioCue.
-        /// </summary>
-        public void ResumeAudioCue(AudioCueSO _audioCue)
-        {
-            if (activeSoundEmitters.ContainsKey(_audioCue)) { return; }
-            activeSoundEmitters[_audioCue].Resume();
         }
 
         // ------------------------------------ PRIVATE ------------------------------------ //
 
         private void Awake()
         {
-            activeSoundEmitters = new Dictionary<AudioCueSO, SoundEmitter>();
+            activeSoundEmitters = new List<AudioCueWrapper>();
 
             _AudioEventChannel.OnAudioCueRequested += PlayAudioCue;
 
@@ -94,6 +69,18 @@ namespace Elysium.Audio
             _soundEmitter.OnSoundFinishedPlaying -= OnSoundEmitterFinishedPlaying;
             _soundEmitter.Stop();
             _pool.Return(_soundEmitter);
+        }
+    }
+
+    public class AudioCueWrapper
+    {
+        public AudioCueSO AudioCue;
+        public SoundEmitter Emitter;
+
+        public AudioCueWrapper(AudioCueSO cue, SoundEmitter emitter)
+        {
+            this.AudioCue = cue;
+            this.Emitter = emitter;
         }
     }
 }

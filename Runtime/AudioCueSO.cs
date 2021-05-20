@@ -12,6 +12,11 @@ namespace Elysium.Audio
 		public bool looping = false;
 		[SerializeField] private AudioClipsGroup[] _audioClipGroups = default;
 
+		public bool IsEmpty()
+		{
+			return _audioClipGroups == null || _audioClipGroups.Length < 1;
+		}
+
 		public AudioClip[] GetClips()
 		{
 			AudioClip[] resultingClips = new AudioClip[_audioClipGroups.Length];

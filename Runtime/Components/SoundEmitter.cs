@@ -65,13 +65,13 @@ namespace Elysium.Audio
         {
             audioSource.Stop();
             StopActiveCoroutine();
-            OnSoundFinishedPlaying.Invoke(this);
+            OnSoundFinishedPlaying?.Invoke(this);
         }
 
         private void StopActiveCoroutine()
         {
             if (IsLooping) { return; }
-            if (activeCoroutine != null) { return; }
+            if (activeCoroutine == null) { return; }
 
             StopCoroutine(activeCoroutine);
             activeCoroutine = null;
@@ -92,7 +92,7 @@ namespace Elysium.Audio
             yield return new WaitForSeconds(clipLength);
 
             activeCoroutine = null;
-            OnSoundFinishedPlaying.Invoke(this); // The AudioManager will pick this up
+            OnSoundFinishedPlaying?.Invoke(this); // The AudioManager will pick this up
         }
     }
 }
