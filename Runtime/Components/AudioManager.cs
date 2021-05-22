@@ -54,7 +54,12 @@ namespace Elysium.Audio
             for (int i = 0; i < nOfClips; i++)
             {
                 SoundEmitter soundEmitter = _pool.Request();
-                activeSoundEmitters.Add(new AudioCueWrapper(_audioCue, _settings, soundEmitter));
+                var wrapper = new AudioCueWrapper(_audioCue, _settings, soundEmitter);
+                activeSoundEmitters.Add(wrapper);
+                if (_settings.IsExclusive)
+                {
+                    exclusiveAudioCues.Add(wrapper);
+                }
                 if (soundEmitter != null)
                 {
                     soundEmitter.PlayAudioClip(clipsToPlay[i], _settings, _audioCue.looping, _position);
