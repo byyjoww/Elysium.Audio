@@ -20,6 +20,7 @@ namespace Elysium.Audio
 
         [Header("Sound properties")]
         public bool Mute = false;
+        public bool IsExclusive = false;
         [Range(0f, 1f)] public float Volume = 1f;
         [Range(-3f, 3f)] public float Pitch = 1f;
         [Range(-1f, 1f)] public float PanStereo = 0f;
