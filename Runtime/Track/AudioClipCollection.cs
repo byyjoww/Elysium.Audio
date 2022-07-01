@@ -52,6 +52,6 @@ namespace Elysium.Audio
 
             lastClipPlayed = nextClipToPlay;
             return clips[nextClipToPlay];
-        }        
+        }
     }
 }

@@ -1,3 +1,4 @@
+using Elysium.Core;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ namespace Elysium.Audio
         private AudioSource source = default;
         private IAudioConfig settings = default;
         private Coroutine active = default;
+        private UnityLogger logger = new UnityLogger();
 
         public bool IsPlaying => source && source.isPlaying;
         public bool IsLooping => source && source.loop;
@@ -30,11 +32,21 @@ namespace Elysium.Audio
         public void Play(AudioClip _clip, IAudioConfig _settings, bool _loop)
         {
             if (!IsPlaying) { Stop(); }
-            source.clip = _clip;
+
+            this.settings = _settings;            
             _settings.ApplyTo(source);
-            // source.transform.position = _settings.position;
+            source.clip = _clip;
             source.loop = _loop;
-            settings = _settings;
+
+            if (source.outputAudioMixerGroup == null)
+            {
+                // TODO: Find a good way to default to master?
+                logger.LogError($"Attempting to play audio clip {_clip.name} without assigning an output mixer group.");
+                OnPlay?.Invoke(_clip, _settings, _loop);
+                OnStop?.Invoke();
+                return;
+            }
+            
             source.Play();
             active = StartCoroutine(NotifyOnEnd());
             OnPlay?.Invoke(_clip, _settings, _loop);
