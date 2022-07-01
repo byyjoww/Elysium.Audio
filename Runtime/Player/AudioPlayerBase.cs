@@ -6,12 +6,12 @@ namespace Elysium.Audio
 {
     public abstract class AudioPlayerBase : MonoBehaviour, IAudioPlayer
     {
-        [SerializeField] protected bool loop = default;
-        [SerializeField] protected AudioMixerGroup group = default;
-        [SerializeField] protected AudioClip clip = default;
         [SerializeField] protected bool playOnStart = default;
+        [SerializeField] protected bool loop = default;        
+        [SerializeField] protected AudioClip clip = default;        
 
         protected abstract IAudioPlayer Player { get; }
+        protected abstract IAudioConfig Config { get; }
         public bool IsPlaying => Player != null && Player.IsPlaying;
         public bool IsLooping => Player != null && Player.IsLooping;
 
@@ -30,7 +30,7 @@ namespace Elysium.Audio
         [ContextMenu("Play")]
         public void Play()
         {
-            Play(clip, new AudioConfig(group), loop);
+            Play(clip, Config, loop);
         }
 
         [ContextMenu("Stop")]

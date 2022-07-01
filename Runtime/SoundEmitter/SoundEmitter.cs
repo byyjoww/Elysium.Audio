@@ -34,7 +34,7 @@ namespace Elysium.Audio
             if (!IsPlaying) { Stop(); }
 
             this.settings = _settings;            
-            _settings.ApplyTo(source);
+            UpdateAudioSourceSettings();
             source.clip = _clip;
             source.loop = _loop;
 
@@ -46,11 +46,12 @@ namespace Elysium.Audio
                 OnStop?.Invoke();
                 return;
             }
-            
+
+            this.settings.OnValueChanged += UpdateAudioSourceSettings;
             source.Play();
             active = StartCoroutine(NotifyOnEnd());
             OnPlay?.Invoke(_clip, _settings, _loop);
-        }
+        }        
 
         public void Pause()
         {
@@ -72,16 +73,34 @@ namespace Elysium.Audio
         {
             if (!IsPlaying) { return; }
             source.Stop();
+            this.settings.OnValueChanged -= UpdateAudioSourceSettings;
             CancelNotifyOnEnd();
-            OnStop?.Invoke();                     
+            OnStop?.Invoke();
+        }
+
+        private void Finish()
+        {
+            this.settings.OnValueChanged -= UpdateAudioSourceSettings;
+            CancelNotifyOnEnd();
+            OnFinish?.Invoke();
+        }
+
+        private void UpdateAudioSourceSettings()
+        {
+            this.settings.ApplyTo(source);            
+            if (IsPlaying)
+            {
+                // Recalculate end of clip (in case pitch changes, for example)
+                CancelNotifyOnEnd();
+                StartCoroutine(NotifyOnEnd());
+            }            
         }
 
         private IEnumerator NotifyOnEnd()
         {
             var wait = new WaitForSecondsRealtime(source.GetClipRemainingTime());
             yield return wait;
-            OnFinish?.Invoke();
-            CancelNotifyOnEnd();
+            Finish();
             if (IsLooping)
             {
                 active = StartCoroutine(NotifyOnEnd());

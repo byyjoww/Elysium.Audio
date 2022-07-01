@@ -5,21 +5,26 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Audio;
 
 namespace Elysium.Audio
 {
     public class SimpleAudioPlayer : AudioPlayerBase
     {
+        [SerializeField] protected AudioMixerGroup group = default;
         [SerializeField] protected bool useSharedPool = default;
         [ConditionalField("useSharedPool")]
         [SerializeField] protected SoundEmitterPoolSO pool = default;
 
         private IAudioPlayer player = default;
+        private IAudioConfig config = default;
 
         protected override IAudioPlayer Player => player;
+        protected override IAudioConfig Config => config;
 
         protected override void OnStarted()
         {
+            config = config = new AudioConfig(group);
             if (!useSharedPool)
             {
                 player = TryGetComponent(out SoundEmitter _emitter) 

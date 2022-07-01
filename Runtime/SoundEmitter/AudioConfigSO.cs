@@ -1,5 +1,7 @@
-﻿using UnityEngine;
+﻿using Elysium.Core;
+using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.Events;
 
 namespace Elysium.Audio
 {
@@ -33,14 +35,15 @@ namespace Elysium.Audio
         [SerializeField] private bool ignoreListenerVolume = false;
         [SerializeField] private bool ignoreListenerPause = false;
 
+        private UnityLogger logger = new UnityLogger();
+
+        public event UnityAction OnValueChanged;
+
         private int Priority
         {
             get { return (int)priorityLevel; }
             set { priorityLevel = (PriorityLevel)value; }
         }
-
-        public bool IsExclusive => isExclusive;
-        public AudioMixerGroup Output => output;
 
         private enum PriorityLevel
         {
@@ -71,6 +74,17 @@ namespace Elysium.Audio
             _audioSource.maxDistance = maxDistance;
             _audioSource.ignoreListenerVolume = ignoreListenerVolume;
             _audioSource.ignoreListenerPause = ignoreListenerPause;
+        }
+
+        [ContextMenu("Apply Changes")]
+        private void TriggerOnValueChanged()
+        {
+            OnValueChanged?.Invoke();
+        }
+
+        private void OnValidate()
+        {
+            if (output == null) { logger.LogError($"Audio Config {name} doesn't have an output mixer group assigned."); }
         }
     }
 }

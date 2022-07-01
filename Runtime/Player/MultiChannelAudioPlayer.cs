@@ -84,7 +84,6 @@ namespace Elysium.Audio
             _channel.OnStop += stopFunc;
             player.OnFinish += finishFunc;
 
-            _channel.LogEvents();
             return player;
         }
 
@@ -102,7 +101,6 @@ namespace Elysium.Audio
                 _channel.OnStop -= stopFunc;
                 player.OnFinish -= finishFunc;
               
-                _channel.LogEvents();
                 openAudioChannels[_channel].Remove(player);
                 pool.Return(_players);
             }

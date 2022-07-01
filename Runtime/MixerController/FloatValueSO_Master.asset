@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bce0a52dacfe24d4f94275f612c0cee1, type: 3}
   m_Name: FloatValueSO_Master
   m_EditorClassIdentifier: 
-  value: 0.5
-  defaultValue: 0.5
+  value: 0.3
+  defaultValue: 0.3

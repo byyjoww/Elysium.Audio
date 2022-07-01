@@ -5,9 +5,11 @@ namespace Elysium.Audio
     public class ChannelAudioPlayer : AudioPlayerBase
     {
         [SerializeField] private OpenChannelEventSO openChannelEvent = default;
+        [SerializeField] private AudioConfigSO config = default;
         private IAudioChannel channel = default;
 
         protected override IAudioPlayer Player => channel;
+        protected override IAudioConfig Config => config;
 
         protected override void OnStarted()
         {
