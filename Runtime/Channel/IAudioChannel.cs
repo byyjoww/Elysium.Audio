@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Elysium.Audio
 {
-    public interface IAudioChannel : IAudioPlayer
+    public interface IAudioChannel : IAudioEmitter
     {        
         void Close();
     }

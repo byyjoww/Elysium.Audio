@@ -8,7 +8,7 @@ using UnityEngine.Events;
 namespace Elysium.Audio
 {
     [RequireComponent(typeof(AudioSource))]
-    public class SoundEmitter : MonoBehaviour, IAudioPlayer
+    public class SoundEmitter : MonoBehaviour, IAudioEmitter
     {
         private AudioSource source = default;
         private IAudioConfig settings = default;

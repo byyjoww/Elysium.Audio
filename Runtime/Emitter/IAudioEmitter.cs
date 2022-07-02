@@ -1,10 +1,9 @@
-﻿using Elysium.Core;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
 namespace Elysium.Audio
 {
-    public interface IAudioPlayer
+    public interface IAudioEmitter
     {
         bool IsPlaying { get; }
         bool IsLooping { get; }
@@ -15,7 +14,6 @@ namespace Elysium.Audio
         event UnityAction OnResume;
         event UnityAction OnFinish;
 
-        void PlayOneShot(AudioClip _clip, IAudioConfig _settings);
         void Play(AudioClip _clip, IAudioConfig _settings, bool _loop);
         void Stop();
         void Pause();

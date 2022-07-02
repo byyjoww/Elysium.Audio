@@ -12,16 +12,16 @@ namespace Elysium.Audio
         [SerializeField] private OpenChannelEventSO openChannelEvent = default;
         [SerializeField] private SoundEmitterPoolSO pool = default;
         private UnityLogger logger = new UnityLogger();
-        private Dictionary<IAudioChannelInternal, List<IAudioPlayer>> openAudioChannels = default;
-        private Dictionary<IAudioPlayer, UnityAction> playerStopEvents = default;
-        private Dictionary<IAudioPlayer, UnityAction> playerFinishEvents = default;
+        private Dictionary<IAudioChannelInternal, List<IAudioEmitter>> openAudioChannels = default;
+        private Dictionary<IAudioEmitter, UnityAction> emitterStopEvents = default;
+        private Dictionary<IAudioEmitter, UnityAction> emitterFinishEvents = default;
 
         public void Awake()
         {
             logger.logEnabled = enableLogging;
-            openAudioChannels = new Dictionary<IAudioChannelInternal, List<IAudioPlayer>>();
-            playerStopEvents = new Dictionary<IAudioPlayer, UnityAction>();
-            playerFinishEvents = new Dictionary<IAudioPlayer, UnityAction>();
+            openAudioChannels = new Dictionary<IAudioChannelInternal, List<IAudioEmitter>>();
+            emitterStopEvents = new Dictionary<IAudioEmitter, UnityAction>();
+            emitterFinishEvents = new Dictionary<IAudioEmitter, UnityAction>();
             openChannelEvent.OnRaise += OnChannelOpened;
         }
 
@@ -38,71 +38,71 @@ namespace Elysium.Audio
 
         internal void OnChannelOpened(IAudioChannelInternal _channel)
         {
-            openAudioChannels.Add(_channel, new List<IAudioPlayer>());
+            openAudioChannels.Add(_channel, new List<IAudioEmitter>());
             _channel.OnPlay += (_clip, _settings, _loop) => Play(_channel, _clip, _settings, _loop);
             _channel.OnClose += delegate { OnChannelClosed(_channel); };
         }
 
         private void OnChannelClosed(IAudioChannelInternal _channel)
         {
-            List<IAudioPlayer> players = openAudioChannels[_channel];
-            ReleaseAudioPlayersForChannel(_channel, players.ToArray());
+            List<IAudioEmitter> emitters = openAudioChannels[_channel];
+            ReleaseAudioEmittersForChannel(_channel, emitters.ToArray());
             openAudioChannels.Remove(_channel);
         }
 
         private void Play(IAudioChannelInternal _channel, AudioClip _clip, IAudioConfig _settings, bool _loop)
         {
-            IAudioPlayer player = RequestAudioPlayerForChannel(_channel);
-            player.Play(_clip, _settings, _loop);
+            IAudioEmitter emitter = RequestAudioEmitterForChannel(_channel);
+            emitter.Play(_clip, _settings, _loop);
         }
 
-        private void Stop(IAudioChannelInternal _channel, IAudioPlayer _player)
+        private void Stop(IAudioChannelInternal _channel, IAudioEmitter _emitter)
         {
-            _player.Stop();
-            ReleaseAudioPlayersForChannel(_channel, _player);
+            _emitter.Stop();
+            ReleaseAudioEmittersForChannel(_channel, _emitter);
         }
 
-        private void Finish(IAudioChannelInternal _channel, IAudioPlayer _player)
+        private void Finish(IAudioChannelInternal _channel, IAudioEmitter _emitter)
         {
             _channel.NotifyTrackFinished();
-            if (!_player.IsLooping) { ReleaseAudioPlayersForChannel(_channel, _player); }
+            if (!_emitter.IsLooping) { ReleaseAudioEmittersForChannel(_channel, _emitter); }
         }
 
-        private IAudioPlayer RequestAudioPlayerForChannel(IAudioChannelInternal _channel)
+        private IAudioEmitter RequestAudioEmitterForChannel(IAudioChannelInternal _channel)
         {
-            IAudioPlayer player = pool.Request();
-            openAudioChannels[_channel].Add(player);
+            IAudioEmitter emitter = pool.Request();
+            openAudioChannels[_channel].Add(emitter);
 
-            _channel.OnPause += player.Pause;
-            _channel.OnResume += player.Resume;
+            _channel.OnPause += emitter.Pause;
+            _channel.OnResume += emitter.Resume;
 
             // TODO: Figure out some better way to handle this
-            UnityAction stopFunc = () => Stop(_channel, player);
-            UnityAction finishFunc = () => Finish(_channel, player);
-            playerStopEvents[player] = stopFunc;
-            playerFinishEvents[player] = finishFunc;
+            UnityAction stopFunc = () => Stop(_channel, emitter);
+            UnityAction finishFunc = () => Finish(_channel, emitter);
+            emitterStopEvents[emitter] = stopFunc;
+            emitterFinishEvents[emitter] = finishFunc;
             _channel.OnStop += stopFunc;
-            player.OnFinish += finishFunc;
+            emitter.OnFinish += finishFunc;
 
-            return player;
+            return emitter;
         }
 
-        private void ReleaseAudioPlayersForChannel(IAudioChannelInternal _channel, params IAudioPlayer[] _players)
+        private void ReleaseAudioEmittersForChannel(IAudioChannelInternal _channel, params IAudioEmitter[] _emitters)
         {
-            for (int i = _players.Length; i-- > 0;)
+            for (int i = _emitters.Length; i-- > 0;)
             {
-                IAudioPlayer player = _players[i];
-                _channel.OnPause -= player.Pause;
-                _channel.OnResume -= player.Resume;
+                IAudioEmitter emitter = _emitters[i];
+                _channel.OnPause -= emitter.Pause;
+                _channel.OnResume -= emitter.Resume;
 
                 // TODO: Figure out some better way to handle this
-                UnityAction stopFunc = playerStopEvents[player];
-                UnityAction finishFunc = playerFinishEvents[player];
+                UnityAction stopFunc = emitterStopEvents[emitter];
+                UnityAction finishFunc = emitterFinishEvents[emitter];
                 _channel.OnStop -= stopFunc;
-                player.OnFinish -= finishFunc;
+                emitter.OnFinish -= finishFunc;
               
-                openAudioChannels[_channel].Remove(player);
-                pool.Return(_players);
+                openAudioChannels[_channel].Remove(emitter);
+                pool.Return(_emitters);
             }
         }
     }

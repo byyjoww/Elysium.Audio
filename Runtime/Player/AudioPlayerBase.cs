@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using Elysium.Core;
+using Elysium.Core.Attributes;
+using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.Events;
 
@@ -7,19 +9,22 @@ namespace Elysium.Audio
     public abstract class AudioPlayerBase : MonoBehaviour, IAudioPlayer
     {
         [SerializeField] protected bool playOnStart = default;
-        [SerializeField] protected bool loop = default;        
-        [SerializeField] protected AudioClip clip = default;        
+        [ConditionalField("playOnStart")]
+        [SerializeField] protected bool loop = default;
+        [ConditionalField("playOnStart")]
+        [SerializeField] protected AudioClip clip = default;
+        protected UnityLogger logger = new UnityLogger();
 
-        protected abstract IAudioPlayer Player { get; }
+        protected abstract IAudioEmitter Emitter { get; }
         protected abstract IAudioConfig Config { get; }
-        public bool IsPlaying => Player != null && Player.IsPlaying;
-        public bool IsLooping => Player != null && Player.IsLooping;
+        public bool IsPlaying => Emitter != null && Emitter.IsPlaying;
+        public bool IsLooping => Emitter != null && Emitter.IsLooping;
 
-        public event UnityAction<AudioClip, IAudioConfig, bool> OnPlay = delegate { };
-        public event UnityAction OnStop = delegate { };
-        public event UnityAction OnPause = delegate { };
-        public event UnityAction OnResume = delegate { };
-        public event UnityAction OnFinish = delegate { };
+        public event UnityAction<AudioClip, IAudioConfig, bool> OnPlay;
+        public event UnityAction OnStop;
+        public event UnityAction OnPause;
+        public event UnityAction OnResume;
+        public event UnityAction OnFinish;
 
         private void Start()
         {
@@ -27,9 +32,25 @@ namespace Elysium.Audio
             if (playOnStart) { Play(); }
         }
 
-        [ContextMenu("Play")]
-        public void Play()
+        [ContextMenu("Play One Shot")]
+        private void PlayOneShot()
         {
+            if (clip is null)
+            {
+                logger.Log($"No audio clip was loaded for player {name}.");
+                return;
+            }
+            PlayOneShot(clip, Config);
+        }
+
+        [ContextMenu("Play")]
+        private void Play()
+        {
+            if (clip is null)
+            {
+                logger.Log($"No audio clip was loaded for player {name}.");
+                return;
+            }
             Play(clip, Config, loop);
         }
 
@@ -54,6 +75,8 @@ namespace Elysium.Audio
             TriggerOnResume();
         }
 
+        public abstract void PlayOneShot(AudioClip _clip, IAudioConfig _settings);
+
         public void Play(AudioClip _clip, IAudioConfig _settings, bool _loop)
         {
             if (IsPlaying) { Stop(); }
@@ -65,26 +88,26 @@ namespace Elysium.Audio
         {
             OnClipFinished();
             TriggerOnFinish();
-        }        
+        }
 
         protected virtual void OnClipStartedPlaying(AudioClip _clip, IAudioConfig _settings, bool _loop)
         {
-            Player.Play(_clip, _settings, _loop);
+            Emitter.Play(_clip, _settings, _loop);
         }
 
         protected virtual void OnClipStoppedPlaying()
         {
-            Player.Stop();
+            Emitter.Stop();
         }
 
         protected virtual void OnClipPaused()
         {
-            Player.Pause();
+            Emitter.Pause();
         }
 
         protected virtual void OnClipResumed()
         {
-            Player.Resume();
+            Emitter.Resume();
         }
 
         protected virtual void OnClipFinished()
@@ -104,27 +127,27 @@ namespace Elysium.Audio
 
         protected void TriggerOnPlay(AudioClip _clip, IAudioConfig _settings, bool _loop)
         {
-            OnPlay.Invoke(_clip, _settings, _loop);
+            OnPlay?.Invoke(_clip, _settings, _loop);
         }
 
         protected void TriggerOnStop()
         {
-            OnStop.Invoke();
+            OnStop?.Invoke();
         }
 
         protected void TriggerOnPause()
         {
-            OnPause.Invoke();
+            OnPause?.Invoke();
         }
 
         protected void TriggerOnResume()
         {
-            OnResume.Invoke();
+            OnResume?.Invoke();
         }
 
         protected void TriggerOnFinish()
         {
-            OnFinish.Invoke();
+            OnFinish?.Invoke();
         }
 
         private void OnDestroy()

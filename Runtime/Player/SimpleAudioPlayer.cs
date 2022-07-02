@@ -9,7 +9,7 @@ using UnityEngine.Audio;
 
 namespace Elysium.Audio
 {
-    public class SimpleAudioPlayer : AudioPlayerBase, IFactory<IAudioPlayer>
+    public class SimpleAudioPlayer : AudioPlayerBase, IFactory<IAudioEmitter>
     {
         [SerializeField] protected AudioMixerGroup group = default;
         [SerializeField] protected bool useSharedPool = default;
@@ -18,12 +18,12 @@ namespace Elysium.Audio
         [ConditionalField("useSharedPool", true)]
         [SerializeField] protected int prewarmAmount = 1;
 
-        private IAudioPlayer player = default;
+        private IAudioEmitter emitter = default;
         private IAudioConfig config = default;
 
-        protected override IAudioPlayer Player => player;
+        protected override IAudioEmitter Emitter => emitter;
         protected override IAudioConfig Config => config;
-        private IPool<IAudioPlayer> Pool { get; set; }
+        private IPool<IAudioEmitter> Pool { get; set; }
 
         protected override void OnStarted()
         {
@@ -35,7 +35,7 @@ namespace Elysium.Audio
 
         protected override void OnDestroyed()
         {
-            if (player != null && player.IsPlaying) { Stop(); }
+            if (emitter != null && emitter.IsPlaying) { Stop(); }
         }
 
         protected override void OnClipStartedPlaying(AudioClip _clip, IAudioConfig _settings, bool _loop)
@@ -58,29 +58,43 @@ namespace Elysium.Audio
 
         private void RequestAudioPlayer()
         {
-            player = Pool.Request();
-            player.OnFinish += Finish;            
+            emitter = Pool.Request();
+            emitter.OnFinish += Finish;            
         }
 
         private void ReleaseAudioPlayer()
         {
-            player.OnFinish -= Finish;
-            Pool.Return(player);
-            player = null;
+            emitter.OnFinish -= Finish;
+            Pool.Return(emitter);
+            emitter = null;
         }
 
-        public IAudioPlayer Create()
+        public IAudioEmitter Create()
         {
             GameObject newObj = new GameObject(nameof(SoundEmitter));
             newObj.transform.SetParent(transform);
             return newObj.AddComponent<SoundEmitter>();
         }
 
-        private IPool<IAudioPlayer> CreateDedicatedPool()
+        private IPool<IAudioEmitter> CreateDedicatedPool()
         {
-            var pool = new ComponentPool<IAudioPlayer>(this, transform);
+            var pool = new ComponentPool<IAudioEmitter>(this, transform);
             if (prewarmAmount > 0) { pool.Prewarm(prewarmAmount); }
             return pool;
+        }
+
+        public override void PlayOneShot(AudioClip _clip, IAudioConfig _settings)
+        {
+            IAudioEmitter emitter = Pool.Request();
+            void OnOneShotFinish()
+            {
+                emitter.OnFinish -= OnOneShotFinish;
+                emitter.OnStop -= OnOneShotFinish;
+                Pool.Return(emitter);
+            }
+            emitter.OnFinish += OnOneShotFinish;
+            emitter.OnStop += OnOneShotFinish;
+            emitter.Play(_clip, _settings, false);
         }
     }
 }

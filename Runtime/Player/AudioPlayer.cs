@@ -8,7 +8,7 @@ namespace Elysium.Audio
         [SerializeField] private AudioConfigSO config = default;
         private IAudioChannel channel = default;
 
-        protected override IAudioPlayer Player => channel;
+        protected override IAudioEmitter Emitter => channel;
         protected override IAudioConfig Config => config;
 
         protected override void OnStarted()
@@ -23,7 +23,21 @@ namespace Elysium.Audio
             {
                 channel.OnFinish -= Finish;
                 channel.Close();
-            }            
-        }        
+            }
+        }
+
+        public override void PlayOneShot(AudioClip _clip, IAudioConfig _settings)
+        {
+            IAudioChannel channel = openChannelEvent.Create();
+            void OnOneShotFinish()
+            {
+                channel.OnFinish -= OnOneShotFinish;
+                channel.OnStop -= OnOneShotFinish;
+                channel.Close();
+            }
+            channel.OnFinish += OnOneShotFinish;
+            channel.OnStop += OnOneShotFinish;
+            channel.Play(_clip, _settings, false);
+        }
     }
 }
