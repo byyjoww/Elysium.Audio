@@ -8,7 +8,7 @@ namespace Elysium.Audio
     {
         [SerializeField] private SoundEmitter emitter = default;
 
-        public override IFactory<IAudioPlayer> Factory => this;
+        protected override IFactory<IAudioPlayer> factory => this;
 
         IAudioPlayer IFactory<IAudioPlayer>.Create()
         {

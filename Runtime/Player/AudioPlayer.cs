@@ -2,7 +2,7 @@
 
 namespace Elysium.Audio
 {
-    public class ChannelAudioPlayer : AudioPlayerBase
+    public class AudioPlayer : AudioPlayerBase
     {
         [SerializeField] private OpenChannelEventSO openChannelEvent = default;
         [SerializeField] private AudioConfigSO config = default;

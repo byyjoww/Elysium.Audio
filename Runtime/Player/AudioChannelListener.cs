@@ -6,7 +6,7 @@ using UnityEngine.Events;
 
 namespace Elysium.Audio
 {
-    public class MultiChannelAudioPlayer : MonoBehaviour
+    public class AudioChannelListener : MonoBehaviour
     {
         [SerializeField] private bool enableLogging = default;
         [SerializeField] private OpenChannelEventSO openChannelEvent = default;

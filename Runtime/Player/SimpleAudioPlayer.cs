@@ -9,28 +9,28 @@ using UnityEngine.Audio;
 
 namespace Elysium.Audio
 {
-    public class SimpleAudioPlayer : AudioPlayerBase
+    public class SimpleAudioPlayer : AudioPlayerBase, IFactory<IAudioPlayer>
     {
         [SerializeField] protected AudioMixerGroup group = default;
         [SerializeField] protected bool useSharedPool = default;
         [ConditionalField("useSharedPool")]
-        [SerializeField] protected SoundEmitterPoolSO pool = default;
+        [SerializeField] protected SoundEmitterPoolSO sharedPool = default;
+        [ConditionalField("useSharedPool", true)]
+        [SerializeField] protected int prewarmAmount = 1;
 
         private IAudioPlayer player = default;
         private IAudioConfig config = default;
 
         protected override IAudioPlayer Player => player;
         protected override IAudioConfig Config => config;
+        private IPool<IAudioPlayer> Pool { get; set; }
 
         protected override void OnStarted()
         {
             config = config = new AudioConfig(group);
-            if (!useSharedPool)
-            {
-                player = TryGetComponent(out SoundEmitter _emitter) 
-                    ? _emitter
-                    : gameObject.AddComponent<SoundEmitter>();
-            }
+            Pool = useSharedPool
+                ? this.sharedPool
+                : CreateDedicatedPool();
         }
 
         protected override void OnDestroyed()
@@ -40,33 +40,47 @@ namespace Elysium.Audio
 
         protected override void OnClipStartedPlaying(AudioClip _clip, IAudioConfig _settings, bool _loop)
         {
-            if (useSharedPool) { RequestAudioPlayer(); }
+            RequestAudioPlayer();
             base.OnClipStartedPlaying(_clip, _settings, _loop);
         }
 
         protected override void OnClipStoppedPlaying()
         {
             base.OnClipStoppedPlaying();
-            if (useSharedPool) { ReleaseAudioPlayer(); }            
+            ReleaseAudioPlayer();
         }
 
         protected override void OnClipFinished()
         {
             base.OnClipFinished();
-            if (useSharedPool) { ReleaseAudioPlayer(); }            
+            ReleaseAudioPlayer();
         }
 
         private void RequestAudioPlayer()
         {
-            player = pool.Request();
+            player = Pool.Request();
             player.OnFinish += Finish;            
         }
 
         private void ReleaseAudioPlayer()
         {
             player.OnFinish -= Finish;
-            pool.Return(player);
+            Pool.Return(player);
             player = null;
+        }
+
+        public IAudioPlayer Create()
+        {
+            GameObject newObj = new GameObject(nameof(SoundEmitter));
+            newObj.transform.SetParent(transform);
+            return newObj.AddComponent<SoundEmitter>();
+        }
+
+        private IPool<IAudioPlayer> CreateDedicatedPool()
+        {
+            var pool = new ComponentPool<IAudioPlayer>(this, transform);
+            if (prewarmAmount > 0) { pool.Prewarm(prewarmAmount); }
+            return pool;
         }
     }
 }
