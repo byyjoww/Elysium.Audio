@@ -13,7 +13,8 @@ namespace Elysium.Audio
         [SerializeField] protected bool loop = default;
         [ConditionalField("playOnStart")]
         [SerializeField] protected AudioClip clip = default;
-        protected UnityLogger logger = new UnityLogger();
+
+        protected IUnityLogger logger = new UnityLogger();
 
         protected abstract IAudioEmitter Emitter { get; }
         protected abstract IAudioConfig Config { get; }

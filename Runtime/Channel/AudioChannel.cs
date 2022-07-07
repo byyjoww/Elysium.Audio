@@ -8,7 +8,7 @@ namespace Elysium.Audio
 {
     public class AudioChannel : IAudioChannel, IAudioChannelInternal
     {
-        private UnityLogger logger = new UnityLogger();
+        private IUnityLogger logger = new UnityLogger();
 
         public bool IsPlaying { get; private set; }
         public bool IsLooping { get; private set; }

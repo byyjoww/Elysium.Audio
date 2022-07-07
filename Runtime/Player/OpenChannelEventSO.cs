@@ -6,7 +6,7 @@ namespace Elysium.Audio
     [CreateAssetMenu(fileName = "OpenChannelEventSO", menuName = "Scriptable Objects/Audio/Open Channel Event")]
     internal class OpenChannelEventSO : GenericEventSO<IAudioChannelInternal>, IFactory<IAudioChannel>
     {
-        private UnityLogger logger = new UnityLogger();
+        private IUnityLogger logger = new UnityLogger();
 
         public IAudioChannel Create()
         {

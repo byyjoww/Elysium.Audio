@@ -18,7 +18,7 @@ namespace Elysium.Audio
             new MixerGroup(Volume.UI),
         };
 
-        private UnityLogger logger = new UnityLogger();
+        private IUnityLogger logger = new UnityLogger();
 
         private void Start()
         {

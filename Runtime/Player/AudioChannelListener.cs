@@ -11,7 +11,8 @@ namespace Elysium.Audio
         [SerializeField] private bool enableLogging = default;
         [SerializeField] private OpenChannelEventSO openChannelEvent = default;
         [SerializeField] private SoundEmitterPoolSO pool = default;
-        private UnityLogger logger = new UnityLogger();
+
+        private IUnityLogger logger = new UnityLogger();
         private Dictionary<IAudioChannelInternal, List<IAudioEmitter>> openAudioChannels = default;
         private Dictionary<IAudioEmitter, UnityAction> emitterStopEvents = default;
         private Dictionary<IAudioEmitter, UnityAction> emitterFinishEvents = default;

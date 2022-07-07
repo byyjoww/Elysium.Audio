@@ -35,7 +35,7 @@ namespace Elysium.Audio
         [SerializeField] private bool ignoreListenerVolume = false;
         [SerializeField] private bool ignoreListenerPause = false;
 
-        private UnityLogger logger = new UnityLogger();
+        private IUnityLogger logger = new UnityLogger();
 
         public event UnityAction OnValueChanged;
 

@@ -13,7 +13,7 @@ namespace Elysium.Audio
         private AudioSource source = default;
         private IAudioConfig settings = default;
         private Coroutine active = default;
-        private UnityLogger logger = new UnityLogger();
+        private IUnityLogger logger = new UnityLogger();
 
         public bool IsPlaying => source && source.isPlaying;
         public bool IsLooping => source && source.loop;
