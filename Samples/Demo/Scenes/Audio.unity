@@ -336,7 +336,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &795092177
 Transform:
   m_ObjectHideFlags: 0
@@ -358,7 +358,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 795092176}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 49d41fed08cca41438aa750aeeed39f2, type: 3}
   m_Name: 
@@ -370,6 +370,54 @@ MonoBehaviour:
   useSharedPool: 0
   sharedPool: {fileID: 0}
   prewarmAmount: 1
+--- !u!1 &853080935
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 853080936}
+  - component: {fileID: 853080937}
+  m_Layer: 0
+  m_Name: SampleAudioFeedback
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &853080936
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 853080935}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1028759273}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &853080937
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 853080935}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e926060e0079d434a958c667b8ba87c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  feedback:
+    audioClip: {fileID: 8300000, guid: 3265327283d479140b97961aefbddf9f, type: 3}
+    audioConfig: {fileID: 11400000, guid: a5d409d99fe4ce64c90947959d4b5636, type: 2}
+  clip: {fileID: 8300000, guid: 3265327283d479140b97961aefbddf9f, type: 3}
+  config: {fileID: 11400000, guid: a5d409d99fe4ce64c90947959d4b5636, type: 2}
 --- !u!1 &953372251
 GameObject:
   m_ObjectHideFlags: 0
@@ -484,6 +532,7 @@ Transform:
   - {fileID: 181681129}
   - {fileID: 795092177}
   - {fileID: 1577726535}
+  - {fileID: 853080936}
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -503,7 +552,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1577726535
 Transform:
   m_ObjectHideFlags: 0

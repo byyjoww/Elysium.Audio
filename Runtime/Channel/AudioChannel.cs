@@ -9,9 +9,13 @@ namespace Elysium.Audio
     public class AudioChannel : IAudioChannel, IAudioChannelInternal
     {
         private IUnityLogger logger = new UnityLogger();
+        private AudioClip clip = default;
+        private IAudioConfig config = default;
 
         public bool IsPlaying { get; private set; }
         public bool IsLooping { get; private set; }
+        AudioClip IAudioChannelInternal.Clip => clip;
+        IAudioConfig IAudioChannelInternal.Config => config;
 
         public event UnityAction<AudioClip, IAudioConfig, bool> OnPlay;
         public event UnityAction OnStop;
@@ -25,18 +29,22 @@ namespace Elysium.Audio
             logger.logEnabled = true;
         }
 
-        public void Play(AudioClip _clip, IAudioConfig _settings, bool _loop)
+        public void Play(AudioClip _clip, IAudioConfig _config, bool _loop)
         {
             if (IsPlaying) { Stop(); }
             IsPlaying = true;
+            clip = _clip;
+            config = _config;
             IsLooping = _loop;
-            OnPlay?.Invoke(_clip, _settings, _loop);
+            OnPlay?.Invoke(_clip, _config, _loop);
         }
 
         public void Stop()
         {
             if (!IsPlaying) { return; }
             IsPlaying = false;
+            clip = null;
+            config = null;
             OnStop?.Invoke();
         }
 
@@ -69,6 +77,8 @@ namespace Elysium.Audio
         void IAudioChannelInternal.NotifyTrackFinished()
         {
             IsPlaying = IsLooping;
+            clip = IsLooping ? clip : null;
+
         }
 
         public void LogEvents()

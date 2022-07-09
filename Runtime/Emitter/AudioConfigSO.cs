@@ -54,6 +54,8 @@ namespace Elysium.Audio
             VeryLow = 256,
         }
 
+        public AudioMixerGroup Group => output;
+
         public void ApplyTo(AudioSource _audioSource)
         {
             _audioSource.outputAudioMixerGroup = output;
